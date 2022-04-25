@@ -98,5 +98,5 @@ runs:
     - name: Dump virtual environment
       run: |
         poetry env info
-        poetry show
+        poetry run pip list
       shell: bash
