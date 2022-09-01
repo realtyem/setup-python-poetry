@@ -52,6 +52,15 @@ runs:
       run: pipx install poetry==1.2.0
       shell: bash
 
+    # For debugging---let's just check what we're working with.
+    - name: Dump virtual environment
+      run: |
+        which poetry
+        poetry version
+        poetry env info
+        poetry run pip list
+      shell: bash
+
     # Poetry manages a virtualenv for us. We're going to cache that too.
     # Again, we're following snok/install-poetry's README.
     - name: Locate poetry venv
