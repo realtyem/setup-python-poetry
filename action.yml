@@ -28,6 +28,22 @@ inputs:
     default: false
     type: string
     require: false
+outputs:
+  python-version:
+    description: Python version that was passed to this workflow.
+    value: "${{ inputs.python-version }}"
+  poetry-version:
+    description: Poetry version that was passed to this workflow.
+    value: "${{ inputs.poetry-version }}"
+  extras:
+    description: Extras that were declared to be used.
+    value: "${{ inputs.extras }}"
+  latest-deps:
+    description: If we are updating dependencies, otherwise use poetry.lock file
+    value: "${{ inputs.latest-deps }}"
+  no-install:
+    description: If the script runs poetry install at the end. If not, has to be done in outside code.
+    value: "${{ inputs.no-install }}"
 runs:
   using: composite
   steps:
