@@ -18,16 +18,27 @@ inputs:
     # we should make this action install all extras by default.
     required: false
     default: ""
+  latest-deps:
+    description: Option to use latest dependencies instead of the ones used in poetry.lock
+    default: false
+    type: string
+    require: false
+  no-install:
+    description: Don't run 'poetry install' at the end of this script, for use with 'pip install' instead.
+    default: false
+    type: string
+    require: false
 runs:
   using: composite
   steps:
     - name: Setup Python
       id: setup-python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ inputs.python-version }}
 
     - name: Check for poetry lock
+      if: "${{ inputs.latest-deps != 'true' }}"
       run: "test -f poetry.lock || (echo No lock file! && false)"
       shell: bash
 
@@ -70,6 +81,7 @@ runs:
         key: poetry-venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}-${{ inputs.extras }}
 
     - name: Check that the poetry lockfile is up to date
+      if: "${{ inputs.latest-deps != 'true' }}"
       # This is rather hacky. We look for the warning message in poetry's
       # output. We really want to use `poetry lock --check`, but that is only
       # available in poetry 1.2.
@@ -87,13 +99,18 @@ runs:
         (echo pyproject.toml was updated without running \`poetry lock --no-update\`. && false)
       shell: bash
 
+    - name: Update dependencies
+      if: "${{ inputs.latest-deps == 'true' }}"
+      run: poetry update
+      shell: bash
+
     - name: Install project (no extras)
-      if: inputs.extras == ''
+      if: "${{ (inputs.extras == '') && (inputs.no-install == 'false') }}"
       run: poetry install --no-interaction
       shell: bash
 
     - name: Install project with --extras=${{ inputs.extras }}
-      if: inputs.extras != ''
+      if: "${{ (inputs.extras != '') && (inputs.no-install == 'false') }}"
       run: poetry install --no-interaction --extras="${{ inputs.extras }}"
       shell: bash
 
