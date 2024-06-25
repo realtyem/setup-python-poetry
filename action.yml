@@ -106,8 +106,8 @@ runs:
 
     - name: Install project with --extras=${{ inputs.extras }} --with=${{ inputs.groups }}
       if: inputs.extras != '' || inputs.groups != ''
-      # (Empty extras or groups lists are fine.)
-      run: poetry install -vv --no-interaction --extras="${{ inputs.extras }}" --with="${{ inputs.groups }}" ${{ inputs.install-project != 'true' && '--no-root' || '' }}
+      # (Empty groups lists are fine.)
+      run: poetry install -vv --no-interaction ${{ inputs.extras != '' && format('--extras="{0}"', inputs.extras) || '' }} --with="${{ inputs.groups }}" ${{ inputs.install-project != 'true' && '--no-root' || '' }}
       shell: bash
 
     # For debugging---let's just check what we're working with.
