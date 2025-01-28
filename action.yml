@@ -1,6 +1,10 @@
 name: Setup Python and Poetry
 description: Setup Python and Poetry. Cribbed from snok/install-poetry.
 inputs:
+  working-directory:
+    description: Directory where the action will execute its commands. Defaults to repository root.
+    required: false
+    default: "./"
   python-version:
     description: Python version to pass to actions/setup-python@v4.
     required: false
@@ -42,6 +46,7 @@ runs:
     - name: Check for poetry lock
       run: "test -f poetry.lock || (echo No lock file! && false)"
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
 
     # Install poetry. It takes ~10seconds for a clean pip install, most of which is
     # the installation rather than the downloading. So instead, we cache the user-base
@@ -73,6 +78,7 @@ runs:
       id: poetry-venvs
       run: echo "dir=$(python -m poetry config virtualenvs.path)" >> "$GITHUB_OUTPUT"
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
 
     - name: Restore/cache poetry venv
       id: poetry-venv-cache
@@ -98,17 +104,20 @@ runs:
         poetry export --without-hashes | (! grep "The lock file is not up to date") ||
         (echo pyproject.toml was updated without running \`poetry lock --no-update\`. && false)
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
 
     - name: Install project (no extras or groups)
       if: inputs.extras == '' && inputs.groups == ''
       run: poetry install -vv --no-interaction ${{ inputs.install-project != 'true' && '--no-root' || '' }}
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
 
     - name: Install project with --extras=${{ inputs.extras }} --with=${{ inputs.groups }}
       if: inputs.extras != '' || inputs.groups != ''
       # (Empty groups lists are fine.)
       run: poetry install -vv --no-interaction ${{ inputs.extras != '' && format('--extras="{0}"', inputs.extras) || '' }} --with="${{ inputs.groups }}" ${{ inputs.install-project != 'true' && '--no-root' || '' }}
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
 
     # For debugging---let's just check what we're working with.
     - name: Dump virtual environment
@@ -116,3 +125,4 @@ runs:
         poetry env info
         poetry run pip list
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
