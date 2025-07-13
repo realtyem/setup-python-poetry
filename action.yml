@@ -86,9 +86,17 @@ runs:
     - name: Locate poetry venv
       id: poetry-venvs
       run: |
-        echo "dir=$(python -m poetry env info -p || echo $(pwd)/.venv)" >> "$GITHUB_OUTPUT"
+        echo "dir=$(echo $(pwd)/.venv)" >> "$GITHUB_OUTPUT"
       shell: bash
       working-directory: ${{ inputs.working-directory }}
+
+    # The venv dir can move based on the version of python used. Just force to always use the
+    # 'in-tree' venv so it is always in the same place. Otherwise, the virtual env dir will not
+    # exist or be definable until the installation of the project has begun and will be uncacheable.
+    - name: Configure poetry venv location
+      shell: bash
+      run: |
+        poetry config virtualenvs.in-project true
 
     - name: Restore/cache poetry venv
       id: poetry-venv-cache
