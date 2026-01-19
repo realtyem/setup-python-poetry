@@ -85,6 +85,7 @@ runs:
       shell: bash
       # This will create the directory but not actually activate the environment. Now the poetry env info -p command
       # will actually find something and not fall back to .venv. This subcommand was introduced in poetry v2.0.0
+      # Note: This is required for venv caching to actually work.
       run: poetry env activate
 
     # Poetry manages a virtualenv for us. We're going to cache that too.
